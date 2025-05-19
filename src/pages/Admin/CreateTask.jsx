@@ -302,7 +302,7 @@ const CreateTask = () => {
       );
 
       toast.success("Task Updated Successfully");
-      setOpenSquareNotification(false);
+      // setOpenSquareNotification(false);
     } catch (error) {
       console.error("Error updating task:", error);
       if (

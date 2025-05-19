@@ -25,6 +25,9 @@ const ManageTasks = () => {
 
       setAllTasks(response.data?.tasks?.length > 0 ? response.data.tasks : []);
 
+      // Log task statuses for debugging
+      // console.log("Fetched tasks statuses:", response.data.tasks.map(t => ({ id: t._id, status: t.status, title: t.title })));
+
       // map statusSummary data with fixed labels and order
       const statusSummary = response.data?.statusSummary || {};
 
