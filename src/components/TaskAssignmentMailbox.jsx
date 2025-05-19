@@ -6,6 +6,9 @@ import toast from "react-hot-toast";
 const TaskAssignmentMailbox = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -20,17 +23,34 @@ const TaskAssignmentMailbox = () => {
     }
   };
 
-  const respondToRequest = async (requestId, action) => {
+  const respondToRequest = async (requestId, action, reason = null) => {
     try {
       await axiosInstance.put(`${API_PATH.TASK_ASSIGNMENT.RESPOND_TO_REQUEST(requestId)}`, {
         action,
+        rejectionReason: reason,
       });
       toast.success(`Request ${action}ed successfully`);
       fetchRequests();
+      setRejectReason("");
+      setShowRejectModal(false);
+      setSelectedRequestId(null);
     } catch (error) {
       console.error(`Error ${action}ing request`, error);
       toast.error(`Failed to ${action} request`);
     }
+  };
+
+  const handleRejectClick = (requestId) => {
+    setSelectedRequestId(requestId);
+    setShowRejectModal(true);
+  };
+
+  const handleRejectSubmit = () => {
+    if (!rejectReason.trim()) {
+      toast.error("Please provide a reason for rejection");
+      return;
+    }
+    respondToRequest(selectedRequestId, "reject", rejectReason);
   };
 
   useEffect(() => {
@@ -66,7 +86,7 @@ const TaskAssignmentMailbox = () => {
               </button>
               <button
                 className="btn btn-danger px-3 py-1 rounded bg-red-500 text-white"
-                onClick={() => respondToRequest(req._id, "reject")}
+                onClick={() => handleRejectClick(req._id)}
               >
                 Reject
               </button>
@@ -74,6 +94,39 @@ const TaskAssignmentMailbox = () => {
           </li>
         ))}
       </ul>
+
+      {showRejectModal && (
+        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="modal-content bg-white p-6 rounded shadow-lg w-96">
+            <h4 className="text-lg font-semibold mb-4">Reject Task Assignment</h4>
+            <textarea
+              className="w-full border border-gray-300 rounded p-2 mb-4"
+              rows={4}
+              placeholder="Enter reason for rejection"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                className="btn btn-secondary px-4 py-1 rounded bg-gray-300"
+                onClick={() => {
+                  setShowRejectModal(false);
+                  setRejectReason("");
+                  setSelectedRequestId(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary px-4 py-1 rounded bg-red-600 text-white"
+                onClick={handleRejectSubmit}
+              >
+                Submit Rejection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

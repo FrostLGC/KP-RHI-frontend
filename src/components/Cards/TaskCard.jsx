@@ -35,6 +35,8 @@ const TaskCard = ({
   location,
   onClick,
 }) => {
+  // console.log("TaskCard status prop:", status); // Debug log
+
   // Format address display
   const formatAddress = () => {
     if (!location?.address) return "Location not specified";
@@ -71,7 +73,11 @@ const TaskCard = ({
 
   return (
     <div
-      className="bg-white rounded-xl py-4 shadow-md shadow-gray-100 border border-gray-200/50 cursor-pointer"
+      className={`bg-white rounded-xl py-4 shadow-md shadow-gray-100 border cursor-pointer ${
+        status === "Rejected"
+          ? "border-red-500 bg-red-50"
+          : "border-gray-200/50"
+      }`}
       onClick={onClick}
     >
       {/* Header with status and priority */}
@@ -134,14 +140,40 @@ const TaskCard = ({
 
         <div className="flex items-center justify-between mt-3">
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <AvatarGroup
-                avatars={(assignedTo || []).map((user) => user.profileImageUrl)}
-              />
-              <div className="text-xs font-medium text-gray-700">
-                {(assignedTo || []).map((user) => user.name).join(", ")}
+              <div className="flex flex-col gap-1">
+                {(assignedTo || []).map((user) => (
+                  <div key={user._id} className="flex items-center gap-2">
+                    <AvatarGroup avatars={[user.profileImageUrl]} />
+                    <div className="text-xs font-medium text-gray-700">
+                      {user.name}
+                      {user.rejected && (
+                        <span className="ml-2 text-red-600 font-semibold">
+                          (Rejected)
+                        </span>
+                      )}
+                    </div>
+                    {user.rejected && user.rejectionReason && (
+                      <div className="text-xs italic text-red-500 ml-6 max-w-xs line-clamp-2">
+                        Reason: {user.rejectionReason}
+                      </div>
+                    )}
+
+                    {/* Add rejection reason as a note in todo checklist style
+                    {user.rejected && user.rejectionReason && (
+                      <div className="text-xs italic text-red-600 mt-1 ml-6 max-w-xs line-clamp-2">
+                        Note: {user.rejectionReason}
+                      </div>
+                    )} */}
+
+                    {/* Show pending status */}
+                    {user.pending && (
+                      <div className="text-xs italic text-blue-600 mt-1 ml-6 max-w-xs line-clamp-2">
+                        Note: Pending approval
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            </div>
             {assignedBy && (
               <div className="flex items-center gap-2">
                 <AvatarGroup avatars={[assignedBy.profileImageUrl]} />

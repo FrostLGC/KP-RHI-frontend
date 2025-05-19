@@ -10,11 +10,13 @@ const TaskListTable = ({ tableData }) => {
         return "bg-purple-100 text-purple-500 border border-purple-200";
       case "In Progress":
         return "bg-cyan-100 text-cyan-500 border border-cyan-200";
+      case "Rejected":
+        return "bg-red-100 text-red-500 border border-red-200";
       default:
-        return "bg-gray-100 text-gray-500 border border-gary-200";
+        return "bg-gray-100 text-gray-500 border border-gray-200";
     }
   };
-
+  
   const getPriorityBadgeColor = (priority) => {
     switch (priority) {
       case "High":
