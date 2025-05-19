@@ -26,35 +26,33 @@ const AdminTaskAssignmentMailbox = () => {
     fetchRequests();
   }, []);
 
-  if (loading) {
-    return <div>Loading assignment requests...</div>;
-  }
-
-  if (requests.length === 0) {
-    return <div>No pending task assignment requests.</div>;
-  }
-
   return (
     <DashboardLayout activeMenu="Task Mailbox">
-      <div className="task-assignment-mailbox card p-4 my-4">
-        <h3 className="text-lg font-semibold mb-3">Pending Task Assignment Requests</h3>
-        <ul>
-          {requests.map((req) => (
-            <li key={req._id} className="mb-3 border-b pb-2">
-              <p>
-                Task: <strong>{req.taskId?.title || "Unknown Task"}</strong>
-              </p>
-              <p>
-                Assigned to: <strong>{req.assignedToUserId?.name || "Unknown User"}</strong>
-              </p>
-              <p>
-                Requested by: <strong>{req.assignedByAdminId?.name || "Unknown Admin"}</strong>
-              </p>
-              <p>Status: <strong>{req.status || "Pending"}</strong></p>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {loading ? (
+        <div>Loading assignment requests...</div>
+      ) : requests.length === 0 ? (
+        <div>No pending task assignment requests.</div>
+      ) : (
+        <div className="task-assignment-mailbox card p-4 my-4">
+          <h3 className="text-lg font-semibold mb-3">Pending Task Assignment Requests</h3>
+          <ul>
+            {requests.map((req) => (
+              <li key={req._id} className="mb-3 border-b pb-2">
+                <p>
+                  Task: <strong>{req.taskId?.title || "Unknown Task"}</strong>
+                </p>
+                <p>
+                  Assigned to: <strong>{req.assignedToUserId?.name || "Unknown User"}</strong>
+                </p>
+                <p>
+                  Requested by: <strong>{req.assignedByAdminId?.name || "Unknown Admin"}</strong>
+                </p>
+                <p>Status: <strong>{req.status || "Pending"}</strong></p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

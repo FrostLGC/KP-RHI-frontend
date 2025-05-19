@@ -107,7 +107,6 @@ const CreateTask = () => {
   const [openConfirmAssignModal, setOpenConfirmAssignModal] = useState(false);
   const [pendingAssignUsers, setPendingAssignUsers] = useState([]);
   const [proceedCreate, setProceedCreate] = useState(false);
-  const [openSquareNotification, setOpenSquareNotification] = useState(false);
 
   const handleValueChange = (key, value) => {
     setTaskData((prevData) => ({
@@ -115,6 +114,44 @@ const CreateTask = () => {
       [key]: value,
     }));
   };
+
+  // New useEffect to check high priority tasks on assignedTo or priority change
+  React.useEffect(() => {
+    const checkHighPriority = async () => {
+      if (
+        taskData.priority === "High" &&
+        taskData.assignedTo.length > 0 &&
+        !proceedCreate
+      ) {
+        try {
+          const response = await axiosInstance.post(
+            API_PATH.TASK_ASSIGNMENT.CHECK_HIGH_PRIORITY_TASKS,
+            {
+              userIds: taskData.assignedTo.map((user) =>
+                typeof user === "string" ? user : user._id
+              ),
+            }
+          );
+          const usersWithHighPriorityTasks = response.data.users || [];
+          if (usersWithHighPriorityTasks.length > 0) {
+            setPendingAssignUsers(usersWithHighPriorityTasks);
+            setOpenConfirmAssignModal(true);
+          } else {
+            setOpenConfirmAssignModal(false);
+            setPendingAssignUsers([]);
+          }
+        } catch (error) {
+          console.error("Error checking high priority tasks", error);
+          toast.error("Failed to check assigned users' task load");
+        }
+      } else {
+        setOpenConfirmAssignModal(false);
+        setPendingAssignUsers([]);
+      }
+    };
+
+    checkHighPriority();
+  }, [taskData.assignedTo, taskData.priority, proceedCreate]);
 
   const updateLocation = (newLocation) => {
     setTaskData((prevData) => ({
@@ -197,12 +234,17 @@ const CreateTask = () => {
         },
       });
 
-      toast.success("Task Created Successfully");
+      if (response.data.assignmentRequestsCreated) {
+        toast.success("Task created with assignment requests pending approval");
+      } else {
+        toast.success("Task Created Successfully");
+      }
 
       clearData();
       setProceedCreate(false);
       setPendingAssignUsers([]);
-      setOpenSquareNotification(false);
+      // Remove setOpenSquareNotification call as it is undefined
+      // setOpenSquareNotification(false);
     } catch (error) {
       console.error("Error creating task:", error);
       if (
@@ -334,6 +376,7 @@ const CreateTask = () => {
       return;
     }
 
+    // Only check high priority warning if not already proceeding
     if (
       !proceedCreate &&
       taskData.priority === "High" &&
@@ -352,7 +395,7 @@ const CreateTask = () => {
 
         if (usersWithHighPriorityTasks.length > 0) {
           setPendingAssignUsers(usersWithHighPriorityTasks);
-          setOpenSquareNotification(true);
+          setOpenConfirmAssignModal(true);
           return;
         }
       } catch (error) {
@@ -369,15 +412,16 @@ const CreateTask = () => {
     }
   };
 
-  const confirmAssign = () => {
-    setOpenSquareNotification(false);
-    setOpenConfirmAssignModal(true);
-  };
+  // Remove unused confirmAssign and cancelSquareNotification functions
+  // const confirmAssign = () => {
+  //   setOpenSquareNotification(false);
+  //   setOpenConfirmAssignModal(true);
+  // };
 
-  const cancelSquareNotification = () => {
-    setOpenSquareNotification(false);
-    setPendingAssignUsers([]);
-  };
+  // const cancelSquareNotification = () => {
+  //   setOpenSquareNotification(false);
+  //   setPendingAssignUsers([]);
+  // };
 
   const confirmAssignModal = () => {
     setOpenConfirmAssignModal(false);
@@ -657,8 +701,8 @@ const CreateTask = () => {
       </Modal>
 
       <Modal
-        isOpen={openSquareNotification}
-        onClose={() => setOpenSquareNotification(false)}
+        isOpen={openConfirmAssignModal}
+        onClose={() => cancelAssignModal()}
         title="Warning"
       >
         <div>
@@ -668,40 +712,16 @@ const CreateTask = () => {
           </p>
           <ul className="list-disc list-inside mb-4">
             {pendingAssignUsers.map((user) => (
-              <li key={user._id}>{user.name}</li>
-            ))}
-          </ul>
-          <p>Are you sure you want to assign this task to these users?</p>
-          <div className="flex justify-end gap-3 mt-5">
-            <button
-              className="btn btn-secondary px-4 py-1 rounded bg-gray-300"
-              onClick={() => cancelSquareNotification()}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn btn-primary px-4 py-1 rounded bg-blue-600 text-white"
-              onClick={() => confirmAssign()}
-            >
-              Yes
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={openConfirmAssignModal}
-        onClose={() => cancelAssignModal()}
-        title="Confirm Task Assignment"
-      >
-        <div>
-          <p className="mb-4">
-            The following users already have 2 or more high priority tasks
-            assigned:
-          </p>
-          <ul className="list-disc list-inside mb-4">
-            {pendingAssignUsers.map((user) => (
-              <li key={user._id}>{user.name}</li>
+              <li key={user._id} className="flex items-center gap-2">
+                {user.profileImageUrl && (
+                  <img
+                    src={user.profileImageUrl}
+                    alt={user.name}
+                    className="w-6 h-6 rounded-full"
+                  />
+                )}
+                <span>{user.name}</span>
+              </li>
             ))}
           </ul>
           <p>Are you sure you want to create a task assigned to these users?</p>

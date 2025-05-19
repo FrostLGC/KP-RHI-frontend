@@ -32,7 +32,7 @@ export const API_PATH = {
     CHECK_HIGH_PRIORITY_TASKS: `${BASE_URL}/api/task-assignment/check-high-priority-tasks`,
     GET_USER_REQUESTS: `${BASE_URL}/api/task-assignment/user-requests`,
     RESPOND_TO_REQUEST: (requestId) =>
-      `${BASE_URL}/api/task-assignment/respond/${requestId}`,
+      `${BASE_URL}/api/task-assignment/${requestId}/respond`,
     GET_ALL_REQUESTS: `${BASE_URL}/api/task-assignment/all-requests`,
   },
 
