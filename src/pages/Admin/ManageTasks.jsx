@@ -6,12 +6,16 @@ import { useNavigate } from "react-router-dom";
 import { LuFileSpreadsheet } from "react-icons/lu";
 import TaskStatusTabs from "../../components/TaskStatusTabs";
 import TaskCard from "../../components/Cards/TaskCard";
+import NewSideMenu from "../../components/NewSideMenu";
 
 const ManageTasks = () => {
   // 1. First declare all state hooks
   const [allTasks, setAllTasks] = useState([]);
   const [tabs, setTabs] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
+  // const [selectedUserId, setSelectedUserId] = useState(null);
+  // const [selectedStatus, setSelectedStatus] = useState(null);
+  // const [sortOption, setSortOption] = useState("createdAt_desc");
 
   const navigate = useNavigate();
 
@@ -24,9 +28,6 @@ const ManageTasks = () => {
       });
 
       setAllTasks(response.data?.tasks?.length > 0 ? response.data.tasks : []);
-
-      // Log task statuses for debugging
-      // console.log("Fetched tasks statuses:", response.data.tasks.map(t => ({ id: t._id, status: t.status, title: t.title })));
 
       // map statusSummary data with fixed labels and order
       const statusSummary = response.data?.statusSummary || {};
@@ -72,10 +73,10 @@ const ManageTasks = () => {
 
   useEffect(() => {
     getAllTasks();
-    console.log(
-      "Tasks with locations:",
-      allTasks.filter((t) => t.location)
-    );
+    // console.log(
+    //   "Tasks with locations:",
+    //   allTasks.filter((t) => t.location)
+    // );
   }, [filterStatus]);
 
   return (

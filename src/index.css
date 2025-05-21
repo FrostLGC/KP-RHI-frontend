@@ -76,3 +76,22 @@ textarea::placeholder {
 .leaflet-control-attribution {
   font-size: 9px !important;
 }
+
+/* .leaflet-attribution-flag {
+  display: none;
+}
+
+.leaflet-custom-attribution {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #555;
+  margin-left: 8px;
+}
+
+.leaflet-custom-attribution svg {
+  display: inline-block;
+  vertical-align: middle;
+} */
+

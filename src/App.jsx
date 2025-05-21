@@ -65,6 +65,13 @@ const App = () => {
             <Route path="/" element={<Root />} />
           </Routes>
         </Router>
+        {/* <div className="leaflet-custom-attribution" style={{ position: "fixed", bottom: 0, right: 0, padding: "4px", backgroundColor: "white", zIndex: 1000 }}>
+          <svg width="12" height="8" viewBox="0 0 12 8" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: "middle" }}>
+            <rect width="12" height="4" fill="#FF0000" />
+            <rect y="4" width="12" height="4" fill="#FFFFFF" />
+          </svg>
+          <a href="https://leafletjs.com" style={{ marginLeft: "4px" }}>Leaflet</a>
+        </div> */}
       </div>
 
       <Toaster

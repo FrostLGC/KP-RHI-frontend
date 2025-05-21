@@ -55,6 +55,10 @@ const TaskCard = ({
         return "text-cyan-500 bg-cyan-50 border border-cyan-500/10";
       case "Completed":
         return "text-lime-500 bg-lime-50 border border-lime-500/20";
+      case "Rejected":
+        return "text-red-600 bg-red-50 border border-red-600/20";
+      case "Pending":
+        return "text-purple-600 bg-purple-50 border border-purple-600/20";
       default:
         return "text-violet-500 bg-violet-50 border border-violet-500/10";
     }
@@ -76,7 +80,13 @@ const TaskCard = ({
       className={`bg-white rounded-xl py-4 shadow-md shadow-gray-100 border cursor-pointer ${
         status === "Rejected"
           ? "border-red-500 bg-red-50"
-          : "border-gray-200/50"
+          : status === "Pending"
+          ? "border-purple-500 bg-purple-50"          
+          : status === "Completed"
+          ? "border-lime-500 bg-lime-50"
+          : status === "Pending Approval"
+          ? "border-violet-500 bg-violet-50"
+          : "border-cyan-500 bg-cyan-50"
       }`}
       onClick={onClick}
     >
@@ -100,7 +110,9 @@ const TaskCard = ({
           status === "In Progress"
             ? "border-cyan-500"
             : status === "Completed"
-            ? "border-indigo-500"
+            ? "border-lime-500"
+            : status === "Rejected"
+            ? "border-red-500"
             : "border-violet-500"
         }`}
       >

@@ -26,6 +26,7 @@ export const API_PATH = {
 
     UPDATE_TASK_STATUS: (taskId) => `${BASE_URL}/api/tasks/${taskId}/status`,
     UPDATE_TODO_CHECKLIST: (taskId) => `${BASE_URL}/api/tasks/${taskId}/todo`,
+    // USERS_TASKS_GROUPED: `${BASE_URL}/api/tasks/users/tasks-grouped`,
   },
 
   TASK_ASSIGNMENT: {
