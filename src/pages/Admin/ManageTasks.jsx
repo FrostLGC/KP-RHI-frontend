@@ -6,57 +6,91 @@ import { useNavigate } from "react-router-dom";
 import { LuFileSpreadsheet } from "react-icons/lu";
 import TaskStatusTabs from "../../components/TaskStatusTabs";
 import TaskCard from "../../components/Cards/TaskCard";
-import NewSideMenu from "../../components/NewSideMenu";
+import { toast } from "react-toastify";
+import { Spinner } from "@heroui/spinner";
+
 
 const ManageTasks = () => {
-  // 1. First declare all state hooks
   const [allTasks, setAllTasks] = useState([]);
   const [tabs, setTabs] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
-  // const [selectedUserId, setSelectedUserId] = useState(null);
-  // const [selectedStatus, setSelectedStatus] = useState(null);
-  // const [sortOption, setSortOption] = useState("createdAt_desc");
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [sortOption, setSortOption] = useState("createdAt_desc");
 
   const navigate = useNavigate();
 
-  const getAllTasks = async () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getAllTasks = async (
+    userId = null,
+    status = null,
+    sort = "createdAt_desc"
+  ) => {
+    setIsLoading(true); // mulai loading
     try {
+      const params = {};
+      if (status && status !== "All") {
+        params.status = status;
+      }
+      if (sort) {
+        const [sortBy, sortOrder] = sort.split("_");
+        params.sortBy = sortBy;
+        params.sortOrder = sortOrder;
+      }
+      if (userId) {
+        params.assignedTo = userId;
+      }
+
       const response = await axiosInstance.get(API_PATH.TASK.GET_ALL_TASKS, {
-        params: {
-          status: filterStatus === "All" ? "" : filterStatus,
-        },
+        params,
       });
 
-      setAllTasks(response.data?.tasks?.length > 0 ? response.data.tasks : []);
+      // Sort tasks
+      let tasks = response.data?.tasks || [];
+      const [sortBy, sortOrder] = sort.split("_");
 
-      // map statusSummary data with fixed labels and order
+      tasks = tasks.sort((a, b) => {
+        if (sortBy === "dueDate") {
+          return sortOrder === "asc"
+            ? new Date(a.dueDate) - new Date(b.dueDate)
+            : new Date(b.dueDate) - new Date(a.dueDate);
+        } else {
+          return sortOrder === "asc"
+            ? new Date(a.createdAt) - new Date(b.createdAt)
+            : new Date(b.createdAt) - new Date(a.createdAt);
+        }
+      });
+
+      setAllTasks(tasks);
+
       const statusSummary = response.data?.statusSummary || {};
-
       const statusArray = [
         { label: "All", count: statusSummary.all || 0 },
         { label: "Pending", count: statusSummary.pendingTasks },
         { label: "In Progress", count: statusSummary.inProgressTasks || 0 },
         { label: "Completed", count: statusSummary.completedTasks || 0 },
       ];
-
       setTabs(statusArray);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching tasks:", error);
+      toast.error("Failed to load tasks. Please try again.");
+    } finally {
+      setIsLoading(false); // selesai loading
     }
   };
+  
 
   const handleClick = (taskData) => {
     navigate(`/admin/create-task`, { state: { taskId: taskData._id } });
   };
 
-  // download task report
   const handleDownloadReport = async () => {
     try {
       const response = await axiosInstance.get(API_PATH.REPORT.EXPORT_TASK, {
         responseType: "blob",
       });
 
-      // Create a URL for the blob
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -66,26 +100,26 @@ const ManageTasks = () => {
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error downloading expense details:", error);
-      toast.error("Failed to download expense details. Please try again.");
+      console.error("Error downloading task details:", error);
+      toast.error("Failed to download task details. Please try again.");
     }
   };
 
   useEffect(() => {
-    getAllTasks();
-    // console.log(
-    //   "Tasks with locations:",
-    //   allTasks.filter((t) => t.location)
-    // );
-  }, [filterStatus]);
+    getAllTasks(selectedUserId, selectedStatus || filterStatus, sortOption);
+  }, [selectedUserId, selectedStatus, filterStatus, sortOption]);
 
   return (
-    <DashboardLayout activeMenu="Manage Tasks">
+    <DashboardLayout
+      activeMenu="Manage Tasks"
+      onUserSelect={setSelectedUserId}
+      onStatusSelect={setSelectedStatus}
+      onSortChange={setSortOption}
+    >
       <div className="my-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-xl md:text-xl font-medium">My Tasks</h2>
-
+            <h2 className="text-xl md:text-xl font-medium">Manage Tasks</h2>
             <button
               className="flex lg:hidden download-btn"
               onClick={handleDownloadReport}
@@ -114,28 +148,42 @@ const ManageTasks = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-          {allTasks.map((item, index) => (
-            <TaskCard
-              key={item._id}
-              title={item.title}
-              description={item.description}
-              priority={item.priority}
-              status={item.status}
-              progress={item.progress}
-              createdAt={item.createdAt}
-              dueDate={item.dueDate}
-              assignedTo={item.assignedTo} // pass full user objects
-              attachmentCount={item.attachments.length || 0}
-              completedTodoCount={item.completedTodoCount || 0}
-              todoChecklist={item.todoChecklist || []}
-              location={item.location}
-              onClick={() => {
-                handleClick(item);
-              }}
+        {isLoading ? (
+          <div className="flex justify-center items-center min-h-screen">
+            <Spinner
+              classNames={{ label: "text-center" }}
+              label="Loading"
+              variant="simple"
             />
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            {allTasks.length > 0 ? (
+              allTasks.map((item) => (
+                <TaskCard
+                  key={item._id}
+                  title={item.title}
+                  description={item.description}
+                  priority={item.priority}
+                  status={item.status}
+                  progress={item.progress}
+                  createdAt={item.createdAt}
+                  dueDate={item.dueDate}
+                  assignedTo={item.assignedTo}
+                  attachmentCount={item.attachments.length || 0}
+                  completedTodoCount={item.completedTodoCount || 0}
+                  todoChecklist={item.todoChecklist || []}
+                  location={item.location}
+                  onClick={() => handleClick(item)}
+                />
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-10 text-gray-500">
+                No tasks found matching your criteria
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

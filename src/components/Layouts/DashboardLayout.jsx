@@ -1,34 +1,45 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { UserContext } from "../../context/userContext";
 import Navbar from "./Navbar";
 import SideMenu from "./SideMenu";
+import SideMenuSortTask from "../SideMenuSortTask";
 
-const DashboardLayout = ({ children, activeMenu }) => {
-  const { user, loading } = useContext(UserContext);
-
-  // useEffect(() => {
-  //   console.log("DashboardLayout user:", user);
-  //   console.log("DashboardLayout loading:", loading);
-  // }, [user, loading]);
-
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
+const DashboardLayout = ({
+  children,
+  activeMenu,
+  onUserSelect,
+  onStatusSelect,
+  onSortChange,
+}) => {
+  const { user } = useContext(UserContext);
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <Navbar activeMenu={activeMenu} />
-      {user && (
-        <div className="flex">
-          {/* Sidebar Desktop */}
-          <div className="max-[1080px]:hidden">
-            <SideMenu activeMenu={activeMenu} />
-          </div>
+      <div className="flex flex-1">
+        {/* Sidebar Desktop */}
+        <div className="max-[1080px]:hidden">
+          <SideMenu activeMenu={activeMenu} />
+        </div>
 
-          {/* Main Content */}
+        {/* Main Content Area */}
+        <div className="flex-1 flex">
+          {/* Task Filter Sidebar */}
+          {(activeMenu === "Manage Tasks" || activeMenu === "My Tasks") && (
+            <div className="max-[1080px]:hidden">
+              <SideMenuSortTask
+                isAdmin={user?.role === "admin"}
+                onUserSelect={onUserSelect}
+                onStatusSelect={onStatusSelect}
+                onSortChange={onSortChange}
+              />
+            </div>
+          )}
+
+          {/* Content */}
           <div className="grow mx-5">{children}</div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

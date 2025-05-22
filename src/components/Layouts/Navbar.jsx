@@ -24,7 +24,7 @@ const Navbar = ({ activeMenu }) => {
 
       {/* Sidebar Mobile */}
       {openSideMenu && (
-        <div className="fixed top-[61px] -ml-4 bg-white">
+        <div className="fixed top-[61px] left-0 bg-white z-20">
           <SideMenu activeMenu={activeMenu} />
         </div>
       )}
