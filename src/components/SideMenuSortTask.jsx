@@ -16,12 +16,17 @@ const SideMenuSortTask = ({
   onUserSelect,
   onStatusSelect,
   onSortChange,
+  selectedUserId: propSelectedUserId,
+  selectedStatus: propSelectedStatus,
+  sortOption: propSortOption,
 }) => {
   const [users, setUsers] = useState([]);
   const [expandedUserIds, setExpandedUserIds] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState(null);
-  const [sortOption, setSortOption] = useState("createdAt_desc");
+  const [selectedUserId, setSelectedUserId] = useState(propSelectedUserId);
+  const [selectedStatus, setSelectedStatus] = useState(propSelectedStatus);
+  const [sortOption, setSortOption] = useState(
+    propSortOption || "createdAt_desc"
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -31,15 +36,17 @@ const SideMenuSortTask = ({
     }
   }, [isAdmin]);
 
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     if (window.innerWidth >= 768 && isCollapsed) {
-  //       setIsCollapsed(false);
-  //     }
-  //   };
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, [isCollapsed]);
+  useEffect(() => {
+    setSelectedUserId(propSelectedUserId);
+  }, [propSelectedUserId]);
+
+  useEffect(() => {
+    setSelectedStatus(propSelectedStatus);
+  }, [propSelectedStatus]);
+
+  useEffect(() => {
+    setSortOption(propSortOption || "createdAt_desc");
+  }, [propSortOption]);
 
   const fetchUsersWithTasks = async () => {
     setIsLoading(true);
@@ -74,8 +81,9 @@ const SideMenuSortTask = ({
   };
 
   const handleUserSelect = (userId) => {
-    setSelectedUserId(userId);
-    if (onUserSelect) onUserSelect(userId);
+    const newUserId = userId === selectedUserId ? null : userId;
+    setSelectedUserId(newUserId);
+    if (onUserSelect) onUserSelect(newUserId);
   };
 
   const handleStatusSelect = (status) => {
@@ -90,22 +98,29 @@ const SideMenuSortTask = ({
     if (onSortChange) onSortChange(newSortOption);
   };
 
+  const resetFilters = () => {
+    setSelectedUserId(null);
+    setSelectedStatus(null);
+    setSortOption("createdAt_desc");
+    if (onUserSelect) onUserSelect(null);
+    if (onStatusSelect) onStatusSelect(null);
+    if (onSortChange) onSortChange("createdAt_desc");
+  };
+
   const statusLabels = ["Pending", "In Progress", "Completed"];
 
   return (
     <>
-      {/* Collapse/Expand Button (fixed position) */}
       <button
         onClick={toggleCollapse}
         className={`fixed top-20 left-0 z-40 bg-primary text-white p-2 rounded-r-md shadow-lg transition-all duration-300 ${
           isCollapsed ? "" : "ml-64"
         }`}
-        aria-label={isCollapsed ? "Show task filters" : "Hide task filters" }
+        aria-label={isCollapsed ? "Show task filters" : "Hide task filters"}
       >
         {isCollapsed ? <FaBars /> : <FaTimes />}
       </button>
 
-      {/* Side Menu (fixed position) */}
       <div
         className={`fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-white border-r border-gray-300 p-4 overflow-auto z-30 shadow-lg transition-all duration-300 ${
           isCollapsed ? "-translate-x-full" : "translate-x-0"
@@ -116,6 +131,13 @@ const SideMenuSortTask = ({
             <FaFilter className="text-primary" />
             Task Filters
           </h2>
+
+          <button
+            onClick={resetFilters}
+            className="w-full bg-gray-100 hover:bg-gray-200 text-xs py-1 px-2 rounded mb-2"
+          >
+            Reset All Filters
+          </button>
 
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">

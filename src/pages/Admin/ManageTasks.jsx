@@ -9,7 +9,6 @@ import TaskCard from "../../components/Cards/TaskCard";
 import { toast } from "react-toastify";
 import { Spinner } from "@heroui/spinner";
 
-
 const ManageTasks = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [tabs, setTabs] = useState([]);
@@ -19,7 +18,6 @@ const ManageTasks = () => {
   const [sortOption, setSortOption] = useState("createdAt_desc");
 
   const navigate = useNavigate();
-
   const [isLoading, setIsLoading] = useState(false);
 
   const getAllTasks = async (
@@ -27,7 +25,7 @@ const ManageTasks = () => {
     status = null,
     sort = "createdAt_desc"
   ) => {
-    setIsLoading(true); // mulai loading
+    setIsLoading(true);
     try {
       const params = {};
       if (status && status !== "All") {
@@ -46,7 +44,6 @@ const ManageTasks = () => {
         params,
       });
 
-      // Sort tasks
       let tasks = response.data?.tasks || [];
       const [sortBy, sortOrder] = sort.split("_");
 
@@ -76,10 +73,19 @@ const ManageTasks = () => {
       console.error("Error fetching tasks:", error);
       toast.error("Failed to load tasks. Please try again.");
     } finally {
-      setIsLoading(false); // selesai loading
+      setIsLoading(false);
     }
   };
-  
+
+  useEffect(() => {
+    if (selectedStatus !== null) {
+      setFilterStatus(selectedStatus);
+    }
+  }, [selectedStatus]);
+
+  useEffect(() => {
+    getAllTasks(selectedUserId, selectedStatus || filterStatus, sortOption);
+  }, [selectedUserId, selectedStatus, filterStatus, sortOption]);
 
   const handleClick = (taskData) => {
     navigate(`/admin/create-task`, { state: { taskId: taskData._id } });
@@ -105,9 +111,11 @@ const ManageTasks = () => {
     }
   };
 
-  useEffect(() => {
-    getAllTasks(selectedUserId, selectedStatus || filterStatus, sortOption);
-  }, [selectedUserId, selectedStatus, filterStatus, sortOption]);
+  const handleAllTabClick = () => {
+    setFilterStatus("All");
+    setSelectedStatus(null);
+    setSelectedUserId(null);
+  };
 
   return (
     <DashboardLayout
@@ -115,6 +123,9 @@ const ManageTasks = () => {
       onUserSelect={setSelectedUserId}
       onStatusSelect={setSelectedStatus}
       onSortChange={setSortOption}
+      selectedUserId={selectedUserId}
+      selectedStatus={selectedStatus}
+      sortOption={sortOption}
     >
       <div className="my-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between">
@@ -134,7 +145,14 @@ const ManageTasks = () => {
               <TaskStatusTabs
                 tabs={tabs}
                 activeTab={filterStatus}
-                setActiveTab={setFilterStatus}
+                setActiveTab={(tab) => {
+                  if (tab === "All") {
+                    handleAllTabClick();
+                  } else {
+                    setFilterStatus(tab);
+                    setSelectedStatus(tab);
+                  }
+                }}
               />
 
               <button
