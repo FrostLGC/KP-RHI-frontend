@@ -1,5 +1,5 @@
 import React from 'react';
-import loginImage from '../../assets/images/RHI.png';
+import loginImage from '../../assets/images/Logo Profile RHI.jpg';
 
 const AuthLayout = ({ children }) => {
   return (
