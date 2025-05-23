@@ -646,7 +646,7 @@ const CreateTask = () => {
               </label>
               <div
                 style={{
-                  height: "300px",
+                  height: "390px",
                   width: "100%",
                   zIndex: 0,
                   position: "relative",

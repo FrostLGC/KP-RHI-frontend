@@ -218,7 +218,7 @@ const TaskCard = ({
             </p>
 
             {location.lat && location.lng ? (
-              <div className="h-[150px] w-full rounded border border-gray-300 overflow-hidden relative z-0">
+              <div className="h-[250px] w-full rounded border border-gray-300 overflow-hidden relative z-0">
                 <MapContainer
                   center={[location.lat, location.lng]}
                   zoom={15}
