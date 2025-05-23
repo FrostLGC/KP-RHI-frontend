@@ -14,11 +14,16 @@ const MyTask = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [sortOption, setSortOption] = useState("createdAt_desc");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const getAllTasks = async (status = null, sort = "createdAt_desc") => {
+  const getAllTasks = async (
+    status = null,
+    sort = "createdAt_desc",
+    search = ""
+  ) => {
     setIsLoading(true);
     try {
       const params = {};
@@ -26,18 +31,19 @@ const MyTask = () => {
         params.status = status;
       }
 
-      // Handle sorting parameters
       if (sort) {
         const [sortBy, sortOrder] = sort.split("_");
         params.sortBy = sortBy;
         params.sortOrder = sortOrder;
+      }
+      if (search) {
+        params.search = search;
       }
 
       const response = await axiosInstance.get(API_PATH.TASK.GET_ALL_TASKS, {
         params,
       });
 
-      // Frontend sorting as fallback
       let tasks = response.data?.tasks || [];
       if (tasks.length > 0) {
         const [sortBy, sortOrder] = sort.split("_");
@@ -80,14 +86,16 @@ const MyTask = () => {
   };
 
   useEffect(() => {
-    getAllTasks(selectedStatus || filterStatus, sortOption);
-  }, [selectedStatus, filterStatus, sortOption]);
+    getAllTasks(selectedStatus || filterStatus, sortOption, searchTerm);
+  }, [selectedStatus, filterStatus, sortOption, searchTerm]);
 
   return (
     <DashboardLayout
       activeMenu="My Tasks"
       onStatusSelect={setSelectedStatus}
       onSortChange={setSortOption}
+      onSearchChange={setSearchTerm}
+      activeStatusTab={filterStatus}
     >
       <div className="my-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between">
@@ -105,7 +113,7 @@ const MyTask = () => {
         {isLoading ? (
           <div className="flex justify-center items-center min-h-screen">
             <Spinner
-              classNames={{ label: "text-foreground mt-4" }}
+              classNames={{ label: "text-center" }}
               label="Loading..."
               variant="simple"
             />

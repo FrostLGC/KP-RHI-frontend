@@ -10,6 +10,11 @@ const DashboardLayout = ({
   onUserSelect,
   onStatusSelect,
   onSortChange,
+  onSearchChange,
+  selectedUserId,
+  selectedStatus,
+  sortOption,
+  activeStatusTab,
 }) => {
   const { user } = useContext(UserContext);
 
@@ -32,6 +37,11 @@ const DashboardLayout = ({
                 onUserSelect={onUserSelect}
                 onStatusSelect={onStatusSelect}
                 onSortChange={onSortChange}
+                onSearchChange={onSearchChange}
+                selectedUserId={selectedUserId}
+                selectedStatus={selectedStatus}
+                sortOption={sortOption}
+                activeStatusTab={activeStatusTab}
               />
             </div>
           )}

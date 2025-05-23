@@ -8,6 +8,7 @@ import {
   FaSort,
   FaBars,
   FaTimes,
+  FaSearch,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -16,9 +17,11 @@ const SideMenuSortTask = ({
   onUserSelect,
   onStatusSelect,
   onSortChange,
+  onSearchChange,
   selectedUserId: propSelectedUserId,
   selectedStatus: propSelectedStatus,
   sortOption: propSortOption,
+  activeStatusTab,
 }) => {
   const [users, setUsers] = useState([]);
   const [expandedUserIds, setExpandedUserIds] = useState([]);
@@ -29,6 +32,7 @@ const SideMenuSortTask = ({
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (isAdmin) {
@@ -47,6 +51,12 @@ const SideMenuSortTask = ({
   useEffect(() => {
     setSortOption(propSortOption || "createdAt_desc");
   }, [propSortOption]);
+
+  useEffect(() => {
+    if (activeStatusTab && activeStatusTab !== selectedStatus) {
+      setSelectedStatus(activeStatusTab === "All" ? null : activeStatusTab);
+    }
+  }, [activeStatusTab]);
 
   const fetchUsersWithTasks = async () => {
     setIsLoading(true);
@@ -98,13 +108,21 @@ const SideMenuSortTask = ({
     if (onSortChange) onSortChange(newSortOption);
   };
 
+  const handleSearchChange = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    if (onSearchChange) onSearchChange(term);
+  };
+
   const resetFilters = () => {
     setSelectedUserId(null);
     setSelectedStatus(null);
     setSortOption("createdAt_desc");
+    setSearchTerm("");
     if (onUserSelect) onUserSelect(null);
     if (onStatusSelect) onStatusSelect(null);
     if (onSortChange) onSortChange("createdAt_desc");
+    if (onSearchChange) onSearchChange("");
   };
 
   const statusLabels = ["Pending", "In Progress", "Completed"];
@@ -134,10 +152,22 @@ const SideMenuSortTask = ({
 
           <button
             onClick={resetFilters}
-            className="w-full bg-gray-100 hover:bg-gray-200 text-xs py-1 px-2 rounded mb-2"
+            className="w-full bg-gray-100 hover:bg-gray-200 text-xs py-1 px-2 rounded mb-3"
           >
             Reset All Filters
           </button>
+
+          {/* Search Input */}
+          <div className="relative mb-3">
+            <input
+              type="text"
+              placeholder="Search by task title..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full border border-gray-300 rounded px-2 py-1 pl-8 text-xs"
+            />
+            <FaSearch className="absolute left-2 top-2 text-gray-400 text-xs" />
+          </div>
 
           <div className="mb-4">
             <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">

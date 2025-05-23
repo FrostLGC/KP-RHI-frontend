@@ -16,6 +16,7 @@ const ManageTasks = () => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [sortOption, setSortOption] = useState("createdAt_desc");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -23,8 +24,19 @@ const ManageTasks = () => {
   const getAllTasks = async (
     userId = null,
     status = null,
-    sort = "createdAt_desc"
+    sort = "createdAt_desc",
+    search = ""
   ) => {
+    console.log(
+      "Fetching tasks with status:",
+      status,
+      "userId:",
+      userId,
+      "sort:",
+      sort,
+      "search:",
+      search
+    );
     setIsLoading(true);
     try {
       const params = {};
@@ -38,6 +50,9 @@ const ManageTasks = () => {
       }
       if (userId) {
         params.assignedTo = userId;
+      }
+      if (search) {
+        params.search = search;
       }
 
       const response = await axiosInstance.get(API_PATH.TASK.GET_ALL_TASKS, {
@@ -59,6 +74,7 @@ const ManageTasks = () => {
         }
       });
 
+      console.log("Fetched tasks count:", tasks.length);
       setAllTasks(tasks);
 
       const statusSummary = response.data?.statusSummary || {};
@@ -84,8 +100,13 @@ const ManageTasks = () => {
   }, [selectedStatus]);
 
   useEffect(() => {
-    getAllTasks(selectedUserId, selectedStatus || filterStatus, sortOption);
-  }, [selectedUserId, selectedStatus, filterStatus, sortOption]);
+    getAllTasks(
+      selectedUserId,
+      selectedStatus || filterStatus,
+      sortOption,
+      searchTerm
+    );
+  }, [selectedUserId, selectedStatus, filterStatus, sortOption, searchTerm]);
 
   const handleClick = (taskData) => {
     navigate(`/admin/create-task`, { state: { taskId: taskData._id } });
@@ -123,9 +144,11 @@ const ManageTasks = () => {
       onUserSelect={setSelectedUserId}
       onStatusSelect={setSelectedStatus}
       onSortChange={setSortOption}
+      onSearchChange={setSearchTerm}
       selectedUserId={selectedUserId}
       selectedStatus={selectedStatus}
       sortOption={sortOption}
+      activeStatusTab={filterStatus}
     >
       <div className="my-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between">
