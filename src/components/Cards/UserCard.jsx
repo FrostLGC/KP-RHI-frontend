@@ -1,15 +1,26 @@
 import React from "react";
 
 const UserCard = ({ userInfo }) => {
+  const profileImageSrc =
+    userInfo?.profileImageUrl && userInfo.profileImageUrl.trim() !== ""
+      ? userInfo.profileImageUrl
+      : null;
+
   return (
     <div className="user-card p-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img
-            src={userInfo?.profileImageUrl}
-            alt={`Avatar`}
-            className="w-12 h-12 rounded-full border-2 border-white"
-          />
+          {profileImageSrc ? (
+            <img
+              src={profileImageSrc}
+              alt={`Avatar`}
+              className="w-12 h-12 rounded-full border-2 border-white"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full border-2 border-white bg-gray-300 flex items-center justify-center text-gray-600">
+              {userInfo?.name?.charAt(0).toUpperCase() || "?"}
+            </div>
+          )}
 
           <div>
             <p className="text-sm font-medium">{userInfo?.name}</p>
@@ -41,8 +52,7 @@ const UserCard = ({ userInfo }) => {
 
 export default UserCard;
 
-const StatCard = ({label, count, status}) => {
-
+const StatCard = ({ label, count, status }) => {
   const getStatusTagColor = () => {
     switch (status) {
       case "In Progress":
@@ -57,7 +67,7 @@ const StatCard = ({label, count, status}) => {
   };
 
   return (
-    <div 
+    <div
       className={`flex-1 text-[10px] font-medium ${getStatusTagColor()} px-4 py-0.5 rounded `}
     >
       <span className="text-[12px] font-semibold">{count}</span> <br /> {label}

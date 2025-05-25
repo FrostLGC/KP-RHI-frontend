@@ -4,7 +4,6 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import Progress from "../Progress";
-import AvatarGroup from "../AvatarGroup";
 import { LuPaperclip } from "react-icons/lu";
 import moment from "moment";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -35,8 +34,6 @@ const TaskCard = ({
   location,
   onClick,
 }) => {
-  // console.log("TaskCard status prop:", status); // Debug log
-
   // Format address display
   const formatAddress = () => {
     if (!location?.address) return "Location not specified";
@@ -81,7 +78,7 @@ const TaskCard = ({
         status === "Rejected"
           ? "border-red-500 bg-red-50"
           : status === "Pending"
-          ? "border-purple-500 bg-purple-50"          
+          ? "border-purple-500 bg-purple-50"
           : status === "Completed"
           ? "border-lime-500 bg-lime-50"
           : status === "Pending Approval"
@@ -152,43 +149,56 @@ const TaskCard = ({
 
         <div className="flex items-center justify-between mt-3">
           <div className="flex flex-col gap-1">
-              <div className="flex flex-col gap-1">
-                {(assignedTo || []).map((user) => (
-                  <div key={user._id} className="flex items-center gap-2">
-                    <AvatarGroup avatars={[user.profileImageUrl]} />
-                    <div className="text-xs font-medium text-gray-700">
-                      {user.name}
-                      {user.rejected && (
-                        <span className="ml-2 text-red-600 font-semibold">
-                          (Rejected)
-                        </span>
-                      )}
+            <div className="flex flex-col gap-1">
+              {(assignedTo || []).map((user) => (
+                <div key={user._id} className="flex items-center gap-2">
+                  {user.profileImageUrl ? (
+                    <img
+                      src={user.profileImageUrl}
+                      alt={user.name}
+                      className="w-6 h-6 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 bg-slate-400 rounded-full flex items-center justify-center text-white text-xs">
+                      {user.name?.charAt(0).toUpperCase() || "?"}
                     </div>
-                    {user.rejected && user.rejectionReason && (
-                      <div className="text-xs italic text-red-500 ml-6 max-w-xs line-clamp-2">
-                        Reason: {user.rejectionReason}
-                      </div>
-                    )}
-
-                    {/* Add rejection reason as a note in todo checklist style
-                    {user.rejected && user.rejectionReason && (
-                      <div className="text-xs italic text-red-600 mt-1 ml-6 max-w-xs line-clamp-2">
-                        Note: {user.rejectionReason}
-                      </div>
-                    )} */}
-
-                    {/* Show pending status */}
-                    {user.pending && (
-                      <div className="text-xs italic text-blue-600 mt-1 ml-6 max-w-xs line-clamp-2">
-                        Note: Pending approval
-                      </div>
+                  )}
+                  <div className="text-xs font-medium text-gray-700">
+                    {user.name}
+                    {user.rejected && (
+                      <span className="ml-2 text-red-600 font-semibold">
+                        (Rejected)
+                      </span>
                     )}
                   </div>
-                ))}
-              </div>
+                  {user.rejected && user.rejectionReason && (
+                    <div className="text-xs italic text-red-500 ml-6 max-w-xs line-clamp-2">
+                      Reason: {user.rejectionReason}
+                    </div>
+                  )}
+
+                  {/* Show pending status */}
+                  {user.pending && (
+                    <div className="text-xs italic text-blue-600 mt-1 ml-6 max-w-xs line-clamp-2">
+                      Note: Pending approval
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
             {assignedBy && (
               <div className="flex items-center gap-2">
-                <AvatarGroup avatars={[assignedBy.profileImageUrl]} />
+                {assignedBy.profileImageUrl ? (
+                  <img
+                    src={assignedBy.profileImageUrl}
+                    alt={assignedBy.name}
+                    className="w-6 h-6 rounded-full"
+                  />
+                ) : (
+                  <div className="w-6 h-6 bg-slate-400 rounded-full flex items-center justify-center text-white text-xs">
+                    {assignedBy.name?.charAt(0).toUpperCase() || "?"}
+                  </div>
+                )}
                 <div className="text-xs font-medium text-gray-700">
                   Assigned by: {assignedBy.name}
                 </div>
@@ -251,7 +261,10 @@ const TaskCard = ({
           </label>
           <ul className="max-h-40 overflow-y-auto">
             {todoChecklist.map((item, idx) => (
-              <li key={`todo_note_${idx}`} className="mb-1 flex items-start gap-2">
+              <li
+                key={`todo_note_${idx}`}
+                className="mb-1 flex items-start gap-2"
+              >
                 <input
                   type="checkbox"
                   checked={item.completed}
@@ -259,7 +272,11 @@ const TaskCard = ({
                   className="mt-1 w-4 h-4 cursor-default"
                 />
                 <div className="flex flex-col">
-                  <span className={`font-semibold ${item.completed ? "line-through text-gray-500" : ""}`}>
+                  <span
+                    className={`font-semibold ${
+                      item.completed ? "line-through text-gray-500" : ""
+                    }`}
+                  >
                     {item.text}
                   </span>
                   {item.note && item.note.trim() !== "" && (
